@@ -17,6 +17,38 @@ Material::~Material() {}
 // the color of that point.
 glm::dvec3 Material::shade(Scene *scene, const ray &r, const isect &i) const {
   // YOUR CODE HERE
+  glm::dvec3 P = r.at(i.getT());          // or r.at(i) [file:1]
+  glm::dvec3 N = glm::normalize(i.getN());
+
+  glm::dvec3 color = ke(i);
+  color += ka(i) * scene->ambient();
+
+  for (const auto& light : scene->getAllLights()) {
+    glm::dvec3 L = glm::normalize(light->getDirection(P));   // NOT i.getN() [file:1]
+    double fd = light->distanceAttenuation(P);               // NOT i.getN() [file:1]
+
+    // shadow ray
+    glm::dvec3 shadowOrigin = P + RAY_EPSILON * N;            // constant name [file:1]
+    ray shadowRay(shadowOrigin, L, glm::dvec3(1.0), ray::SHADOW);
+    glm::dvec3 shadow = light->shadowAttenuation(shadowRay, P);
+
+    glm::dvec3 I = light->getColor() * fd * shadow;
+
+    double NdotL = glm::dot(N, L);
+    if (NdotL > 0.0) {
+      color += kd(i) * I * NdotL;
+
+      if (glm::length(ks(i)) > 0.0) {
+        glm::dvec3 V = glm::normalize(-r.getDirection());
+        glm::dvec3 H = glm::normalize(L + V);
+        double NdotH = glm::dot(N, H);
+        if (NdotH > 0.0) color += ks(i) * I * std::pow(NdotH, shininess(i));
+      }
+    }
+  }
+
+  
+  return color;
 
   // For now, this method just returns the diffuse color of the object.
   // This gives a single matte color for every distinct surface in the
@@ -42,7 +74,7 @@ glm::dvec3 Material::shade(Scene *scene, const ray &r, const isect &i) const {
   // 		.
   // 		.
   // }
-  return kd(i);
+  // return kd(i);
 }
 
 TextureMap::TextureMap(string filename) {

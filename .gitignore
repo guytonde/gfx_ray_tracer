@@ -1,1 +1,9 @@
 /build
+.venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+raycheck.out
+assets/
+scenes_all/

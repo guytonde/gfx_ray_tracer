@@ -1,0 +1,5 @@
+colorama
+numpy
+Pillow
+matplotlib
+scipy
