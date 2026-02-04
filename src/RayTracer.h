@@ -77,9 +77,10 @@ private:
   std::vector<std::thread> workers;
   std::queue<std::pair<int,int>> workQueue;
   std::mutex workMutex;
-  std::atomic<int> blocksDone;
-  int blocksTotal;
-  std::atomic<bool> rendering;
+
+  std::atomic<int> blocksDone{0};
+  int blocksTotal = 0;
+  std::atomic<bool> rendering{false};
 };
 
 #endif // __RAYTRACER_H__
